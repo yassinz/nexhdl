@@ -21,7 +21,7 @@ class UartTx[CLK_FREQ: int, BAUD_RATE: int](Module):
         
         IDLE, START, DATA, STOP = Logic[2](0), Logic[2](1), Logic[2](2), Logic[2](3)
         
-        state      = Reg[Logic[2]](reset_value=IDLE)
+        state      = Reg[Logic[2]](init=IDLE)
         shift_reg  = Reg[Logic[8]]()
         bit_idx    = Reg[Logic[3]]()
         counter    = Reg[Logic[BIT_WIDTH]]()
@@ -87,11 +87,11 @@ class UartRx[CLK_FREQ: int, BAUD_RATE: int](Module):
         
         IDLE, START, DATA, STOP = Logic[2](0), Logic[2](1), Logic[2](2), Logic[2](3)
         
-        state     = Reg[Logic[2]](reset_value=IDLE)
+        state     = Reg[Logic[2]](init=IDLE)
         shift_reg = Reg[Logic[8]]()
         bit_idx   = Reg[Logic[3]]()
         counter   = Reg[Logic[BIT_WIDTH]]()
-        valid_reg = Reg[Logic[1]](reset_value=0)
+        valid_reg = Reg[Logic[1]](init=0)
         
         # Sampling point is in the middle of the bit period
         half_tick = (counter == (CYCLES_PER_BIT // 2 - 1))

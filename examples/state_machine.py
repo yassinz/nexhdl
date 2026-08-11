@@ -26,7 +26,7 @@ class TrafficLight(Module):
         RED    = Logic[2](2)
 
         # Register to hold the current state
-        state = Reg[Logic[2]](reset_value=RED)
+        state = Reg[Logic[2]](init=RED)
 
         with io.clk.posedge, io.rst.negedge:
             # Define next state transitions using Map or if/else

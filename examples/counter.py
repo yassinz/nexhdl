@@ -12,7 +12,7 @@ class Counter(Module):
     def build(self, io):
         # Create a 16-bit register
         # It inherits Logic[16] methods, so we can increment it directly
-        r = Reg[Logic[16]](reset_value=0)
+        r = Reg[Logic[16]](init=0)
 
         # Sequential logic context
         with io.clk.posedge, io.rst.negedge:

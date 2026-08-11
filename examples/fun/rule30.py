@@ -11,7 +11,7 @@ class Rule30[WIDTH: int](Module):
 
     def build(self, io):
         # 1. State: The array of cells
-        cells = Reg[Array[WIDTH, Logic[1]]](reset_value=Array[WIDTH, Logic[1]]([0]*WIDTH))
+        cells = Reg[Array[WIDTH, Logic[1]]](init=Array[WIDTH, Logic[1]]([0]*WIDTH))
 
         # 2. Spatial Logic: Generate the Rule 30 gates for every cell in parallel
         # Rule 30 logic: Next = Left ^ (Center | Right)

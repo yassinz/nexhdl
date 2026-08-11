@@ -127,9 +127,6 @@ reg = Reg[Logic[32]]()
 # With initial value
 reg = Reg[Logic[32]](init=42)
 
-# With reset value
-reg = Reg[Logic[32]](reset_value=0)
-
 # Assign in clock context
 with io.clk.posedge:
     reg.next = reg + 1

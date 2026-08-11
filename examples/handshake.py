@@ -23,7 +23,7 @@ class HandshakeBuffer[T](Module):
         # Register to store the data
         data_reg = Reg[T]()
         # Register to track if the buffer is full
-        full_reg = Reg[Logic[1]](reset_value=0)
+        full_reg = Reg[Logic[1]](init=0)
         
         # Internal Logic: Handshake state machine
         # We can accept data if our buffer is empty OR the downstream is ready to receive

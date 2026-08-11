@@ -65,7 +65,7 @@ class PipelinedMAC[WIDTH: PositiveInt](Module):
         prod_reg = Reg[Logic[40]]()
         
         # Stage 2: Accumulator
-        acc_reg = Reg[Logic[40]](reset_value=0)
+        acc_reg = Reg[Logic[40]](init=0)
         
         with io.clk.posedge, io.rst.negedge:
             # --- Stage 1: Multiplication ---

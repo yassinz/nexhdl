@@ -10,7 +10,7 @@ Usage:
         out: OUTPUT[Logic[32]]
         
         def construct(io):
-            counter = Reg[Logic[32]](reset_value=0)
+            counter = Reg[Logic[32]](init=0)
             with io.clk.posedge:
                 counter.next = counter + 1
             io.out = counter

@@ -17,9 +17,9 @@ class LuckySevenSlot(Module):
     def build(self, io):
         # --- State Definitions (Reference Sec 3) ---
         # Three registers initialized to 0, 1, 2 so they start offset
-        r1 = Reg[Logic[3]](reset_value=0)
-        r2 = Reg[Logic[3]](reset_value=1)
-        r3 = Reg[Logic[3]](reset_value=2)
+        r1 = Reg[Logic[3]](init=0)
+        r2 = Reg[Logic[3]](init=1)
+        r3 = Reg[Logic[3]](init=2)
         
         # A speed controller to make reels spin at different rates
         # Reel 1: Every tick, Reel 2: Every 2 ticks, Reel 3: Every 4 ticks

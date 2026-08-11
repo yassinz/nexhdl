@@ -32,7 +32,7 @@ class BouncingSprite[WIDTH: int, SCREEN_W: int, SCREEN_H: int](Module):
     
     def build(self, io):
         # State registers
-        sprite = Reg[SpriteState[WIDTH]](reset_value=SpriteState[WIDTH](
+        sprite = Reg[SpriteState[WIDTH]](init=SpriteState[WIDTH](
             pos=Coord[WIDTH](x=SCREEN_W // 2, y=SCREEN_H // 2),
             vel=Coord[WIDTH](x=2, y=3),
             color=0b101  # Magenta

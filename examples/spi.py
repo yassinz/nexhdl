@@ -30,12 +30,12 @@ class SpiMaster[CLK_DIV: int](Module):
         
         IDLE, TRANSFER, DONE = Logic[2](0), Logic[2](1), Logic[2](2)
         
-        state      = Reg[Logic[2]](reset_value=IDLE)
+        state      = Reg[Logic[2]](init=IDLE)
         shift_reg  = Reg[Logic[8]]()
         rx_reg     = Reg[Logic[8]]()
         bit_idx    = Reg[Logic[3]]()
         counter    = Reg[Logic[COUNT_WIDTH]]()
-        sclk_reg   = Reg[Logic[1]](reset_value=0)
+        sclk_reg   = Reg[Logic[1]](init=0)
         
         # Timing ticks
         tick = (counter == (HALF_PERIOD - 1))

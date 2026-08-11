@@ -22,7 +22,7 @@ class CRC32(Module):
         POLYNOMIAL = 0x04C11DB7
         
         # Current CRC state
-        crc_reg = Reg[Logic[32]](reset_value=0xFFFFFFFF)
+        crc_reg = Reg[Logic[32]](init=0xFFFFFFFF)
         
         # Combinatorial logic to calculate the next CRC value for 8 bits of data
         # We calculate this bit-by-bit using a Python loop to generate the unrolled logic
