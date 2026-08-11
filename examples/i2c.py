@@ -31,15 +31,15 @@ class I2cMaster[CLK_DIV: int](Module):
         states = [Logic[3](i) for i in range(7)]
         (S_IDLE, S_START, S_ADDR, S_ACK1, S_DATA, S_ACK2, S_STOP) = states
         
-        state      = Reg[Logic[3]](reset_value=S_IDLE)
+        state      = Reg[Logic[3]](init=S_IDLE)
         shift_reg  = Reg[Logic[8]]()
         bit_idx    = Reg[Logic[3]]()
         counter    = Reg[Logic[BIT_W]]()
-        phase      = Reg[Logic[2]](reset_value=0) # 0, 1, 2, 3
+        phase      = Reg[Logic[2]](init=0) # 0, 1, 2, 3
         
-        scl_o_reg  = Reg[Logic[1]](reset_value=1)
-        sda_o_reg  = Reg[Logic[1]](reset_value=1)
-        ack_error  = Reg[Logic[1]](reset_value=0)
+        scl_o_reg  = Reg[Logic[1]](init=1)
+        sda_o_reg  = Reg[Logic[1]](init=1)
+        ack_error  = Reg[Logic[1]](init=0)
         
         q_tick = (counter == (Q_PERIOD - 1))
         p_done = q_tick & (phase == 3)
