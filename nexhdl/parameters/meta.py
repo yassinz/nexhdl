@@ -4,10 +4,37 @@ Parameterized Metaclass - For generic types
 
 from abc import ABCMeta
 from typing import Any, Dict
+import functools
 import types
 
 from .proxy import ParameterProxy
 from .resolver import ParameterResolver
+
+
+def specialize_function(func: types.FunctionType, param_dict: dict) -> types.FunctionType:
+    """
+    Rebind a function's free variables to concrete parameter values.
+
+    PEP 695 `class Foo[T]` wraps the class body in an implicit generic
+    scope, so methods referencing T close over T's TypeVar cell rather
+    than reading it from the class namespace. To specialize Foo[32], we
+    must construct a new function object whose closure cells hold the
+    resolved values instead of the TypeVars.
+    """
+    new_globals = func.__globals__ | param_dict  # harmless fallback path
+    new_closure = func.__closure__
+
+    if func.__code__.co_freevars and func.__closure__:
+        cells = list(func.__closure__)
+        for i, name in enumerate(func.__code__.co_freevars):
+            if name in param_dict:
+                cells[i] = types.CellType(param_dict[name])
+        new_closure = tuple(cells)
+
+    new_func = types.FunctionType(
+        func.__code__, new_globals, func.__name__, func.__defaults__, new_closure
+    )
+    return functools.update_wrapper(new_func, func)
 
 
 class Param:
@@ -133,33 +160,9 @@ class ParameterizedMeta(ABCMeta):
                       '_cached_type', '_hw_type', '__type_params__'):
                 continue
             
-            # For methods, inject parameters into their globals
+            # For methods, inject parameters into their globals and closure cells
             if isinstance(value, types.FunctionType):
-                new_globals = value.__globals__.copy()
-                new_globals.update(param_dict)
-                
-                # Handle closure variables
-                new_closure = value.__closure__
-                if value.__code__.co_freevars and value.__closure__:
-                    freevars = value.__code__.co_freevars
-                    closure_cells = list(value.__closure__)
-                    
-                    for i, freevar in enumerate(freevars):
-                        if freevar in param_dict:
-                            def make_cell(val):
-                                return (lambda: val).__closure__[0]
-                            closure_cells[i] = make_cell(param_dict[freevar])
-                    
-                    new_closure = tuple(closure_cells)
-                
-                new_func = types.FunctionType(
-                    value.__code__,
-                    new_globals,
-                    value.__name__,
-                    value.__defaults__,
-                    new_closure
-                )
-                new_namespace[key] = new_func
+                new_namespace[key] = specialize_function(value, param_dict)
             else:
                 new_namespace[key] = value
         

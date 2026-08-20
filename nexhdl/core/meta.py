@@ -6,7 +6,7 @@ import types
 from circt.dialects import hw
 
 from .ports import PortDirection
-from ..parameters import ParameterizedNamespace, ParameterResolver, Param
+from ..parameters import ParameterizedNamespace, ParameterResolver, Param, specialize_function
 from ..types.base import to_nex_type
 
 
@@ -114,7 +114,7 @@ class ModuleMeta(type):
                 continue
             
             if isinstance(value, types.FunctionType):
-                new_namespace[key] = cls._inject_params_to_func(value, param_dict)
+                new_namespace[key] = specialize_function(value, param_dict)
             else:
                 new_namespace[key] = value
         
@@ -160,17 +160,4 @@ class ModuleMeta(type):
     @staticmethod
     def _inject_params_to_func(func, param_dict):
         """Inject parameters into function globals and closures."""
-        new_globals = func.__globals__.copy()
-        new_globals.update(param_dict)
-        
-        new_closure = func.__closure__
-        if func.__code__.co_freevars and func.__closure__:
-            closure_cells = list(func.__closure__)
-            for i, freevar in enumerate(func.__code__.co_freevars):
-                if freevar in param_dict:
-                    closure_cells[i] = types.CellType(param_dict[freevar])
-            new_closure = tuple(closure_cells)
-        
-        return types.FunctionType(
-            func.__code__, new_globals, func.__name__, func.__defaults__, new_closure
-        )
+        return specialize_function(func, param_dict)
