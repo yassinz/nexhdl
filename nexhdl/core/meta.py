@@ -168,7 +168,7 @@ class ModuleMeta(type):
             closure_cells = list(func.__closure__)
             for i, freevar in enumerate(func.__code__.co_freevars):
                 if freevar in param_dict:
-                    closure_cells[i] = (lambda val: (lambda: val).__closure__[0])(param_dict[freevar])
+                    closure_cells[i] = types.CellType(param_dict[freevar])
             new_closure = tuple(closure_cells)
         
         return types.FunctionType(
