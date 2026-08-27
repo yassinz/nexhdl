@@ -25,6 +25,14 @@ class ParameterResolver:
             new_args = tuple(ParameterResolver.resolve(arg, param_dict) for arg in args)
             return annotation.__origin__[new_args] if new_args else annotation
         
+        # Collections
+        if isinstance(annotation, tuple):
+            return tuple(ParameterResolver.resolve(item, param_dict) for item in annotation)
+        if isinstance(annotation, list):
+            return [ParameterResolver.resolve(item, param_dict) for item in annotation]
+        if isinstance(annotation, dict):
+            return {k: ParameterResolver.resolve(v, param_dict) for k, v in annotation.items()}
+        
         return annotation
     
     @staticmethod

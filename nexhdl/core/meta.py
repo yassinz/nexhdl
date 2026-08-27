@@ -89,14 +89,32 @@ class ModuleMeta(type):
     
     def _build_parameterized_namespace(cls, param_dict):
         """Build namespace for parameterized class."""
-        new_namespace = param_dict.copy()
+        extended_params = param_dict.copy()
+        new_namespace = extended_params.copy()
         
-        # Resolve port types first (special case)
+        # Copy structural metadata
+        for key in ('inputs', 'outputs', 'inouts', 'ports'):
+            if hasattr(cls, key):
+                new_namespace[key] = getattr(cls, key)
+        
+        # Resolve class attributes (constants, types, expressions)
+        for key, value in cls.__dict__.items():
+            if (key.startswith('_') and key != '__init__') or key in param_dict:
+                continue
+            if not isinstance(value, types.FunctionType):
+                new_namespace[key] = ParameterResolver.resolve(value, extended_params)
+                extended_params[key] = new_namespace[key]
+        
+        # Specialize methods with resolved parameters
+        for key, value in cls.__dict__.items():
+            if isinstance(value, types.FunctionType):
+                new_namespace[key] = specialize_function(value, extended_params)
+        
+        # Resolve port types
         if hasattr(cls, '_port_type_objs'):
             resolved_ports = {}
             for name, type_obj in cls._port_type_objs.items():
-                resolved = ParameterResolver.resolve(type_obj, param_dict)
-                # Normalize resolved type (e.g. int -> Logic)
+                resolved = ParameterResolver.resolve(type_obj, extended_params)
                 try:
                     resolved = to_nex_type(resolved)
                 except TypeError:
@@ -104,24 +122,10 @@ class ModuleMeta(type):
                 resolved_ports[name] = resolved
             new_namespace['_port_type_objs'] = resolved_ports
         
-        # Copy other class attributes (except 'name', handle that separately)
-        for key in ('inputs', 'outputs', 'inouts', 'ports'):
-            if hasattr(cls, key):
-                new_namespace[key] = getattr(cls, key)
-        
-        for key, value in cls.__dict__.items():
-            if key.startswith('_') and key != '__init__' or key in param_dict:
-                continue
-            
-            if isinstance(value, types.FunctionType):
-                new_namespace[key] = specialize_function(value, param_dict)
-            else:
-                new_namespace[key] = value
-        
         # Resolve annotations
         if hasattr(cls, '__annotations__'):
             new_namespace['__annotations__'] = ParameterResolver.resolve_annotations(
-                cls.__annotations__, param_dict
+                cls.__annotations__, extended_params
             )
         
         return new_namespace

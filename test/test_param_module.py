@@ -86,6 +86,26 @@ def test_param_type():
 
 
 
+def test_param_class_attribute_resolution():
+    class ModuleWithClassAttr[DEPTH: int](Module):
+        CTR_BITS = clog2(DEPTH)
+        
+        clk: INPUT[Clock]
+        in_val: INPUT[Logic[CTR_BITS]]
+        out_val: OUTPUT[Logic[CTR_BITS]]
+        
+        def build(self, io):
+            ptr = Reg[Logic[self.CTR_BITS]]()
+            with io.clk.posedge:
+                ptr.next = io.in_val
+            io.out_val = ptr
+    
+    mod = ModuleWithClassAttr[16]()
+    assert mod.CTR_BITS == 4
+    mod.compile()
+
+
 if __name__ == "__main__":
     test_param_adder()
     test_param_type()
+    test_param_class_attribute_resolution()

@@ -132,39 +132,37 @@ class ParameterizedMeta(ABCMeta):
                 bound.validate(tp.__name__, val)
         
         # Map parameter names to values
-        param_dict = {p.__name__: v for p, v in zip(type_params, params)}
-        
-        # Resolve annotations
-        new_annotations = {}
-        if hasattr(cls, '__annotations__'):
-            new_annotations = ParameterResolver.resolve_annotations(
-                cls.__annotations__, param_dict
-            )
+        extended_params = {p.__name__: v for p, v in zip(type_params, params)}
         
         # Create resolved class namespace
         class_name = f'{cls.__name__}[{", ".join(str(p) for p in params)}]'
         new_namespace = {
-            '__annotations__': new_annotations,
             '__module__': cls.__module__,
             '__qualname__': class_name,
             '_generic_base': cls,
             '_type_args': params,
-            **param_dict,
+            **extended_params,
         }
         
-        # Copy methods from original class
+        # Resolve class attributes (constants, types, expressions)
         for key, value in cls.__dict__.items():
-            if key in new_namespace:
-                continue
             if key in ('__dict__', '__weakref__', '__annotations__', 
-                      '_cached_type', '_hw_type', '__type_params__'):
+                      '_cached_type', '_hw_type', '__type_params__') or key in extended_params:
                 continue
-            
-            # For methods, inject parameters into their globals and closure cells
+            if not isinstance(value, types.FunctionType):
+                new_namespace[key] = ParameterResolver.resolve(value, extended_params)
+                extended_params[key] = new_namespace[key]
+        
+        # Specialize methods with resolved parameters
+        for key, value in cls.__dict__.items():
             if isinstance(value, types.FunctionType):
-                new_namespace[key] = specialize_function(value, param_dict)
-            else:
-                new_namespace[key] = value
+                new_namespace[key] = specialize_function(value, extended_params)
+        
+        # Resolve annotations
+        if hasattr(cls, '__annotations__'):
+            new_namespace['__annotations__'] = ParameterResolver.resolve_annotations(
+                cls.__annotations__, extended_params
+            )
         
         # Create new class using the SAME metaclass
         return type(cls)(class_name, (cls,), new_namespace)
