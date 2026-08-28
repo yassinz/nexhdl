@@ -56,7 +56,7 @@ def test_pc():
         io.rst = 1
 
         # test BRANCH
-        io.inst = {"inst": 0b0000000000000000000000000_11000_11}
+        io.inst = 0b0000000000000000000000000_11000_11
         io.taken = 1
         sim.tick()
         sim.tick()
@@ -73,7 +73,7 @@ def test_pc():
         io.rst = 1
 
         # Test JAL
-        io.inst = {"inst": 0b0000000000000100000000000_11011_11}
+        io.inst = 0b0000000000000100000000000_11011_11
         sim.tick()
         assert io.out == 0x40000
         sim.tick()
@@ -84,7 +84,7 @@ def test_pc():
         io.rst = 1
 
         # test JALR
-        io.inst = {"inst": 0b0000000000000000000000000_11001_11}
+        io.inst = 0b0000000000000000000000000_11001_11
         io.rs1 = 0xff
         sim.tick()
         assert io.out == 0xff
