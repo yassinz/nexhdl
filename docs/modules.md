@@ -52,6 +52,10 @@ class DataModule(Module):
     # Struct
     packet: INPUT[Packet]
     
+    # Ready/Valid Streaming Interface (ESI)
+    stream_in:  INPUT[Stream[Logic[32]]]
+    stream_out: OUTPUT[Stream[Logic[32]]]
+    
     # Nested
     matrix: OUTPUT[Array[4, Array[4, Logic[16]]]]
 ```

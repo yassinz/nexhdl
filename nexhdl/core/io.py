@@ -16,9 +16,9 @@ class IO:
     - Inouts: read-write
     """
     
-    __slots__ = ('_module_name', '_ports', '_types', '_assigned', '_all_names')
+    __slots__ = ('_module_name', '_ports', '_types', '_assigned', '_all_names', '_interfaces', '_interface_handles')
     
-    def __init__(self, module_name, inputs, outputs, inouts):
+    def __init__(self, module_name, inputs, outputs, inouts, interfaces=None):
         """
         Initialize IO interface.
         
@@ -27,8 +27,11 @@ class IO:
             inputs: List of (name, value) tuples
             outputs: List of (name, type_obj) tuples
             inouts: List of (name, value) tuples
+            interfaces: Optional dict of {interface_name: InterfacePort}
         """
         self._module_name = module_name
+        self._interfaces = interfaces or {}
+        self._interface_handles = {}
         self._ports = {
             **{name: ('input', val) for name, val in inputs},
             **{name: ('output', None) for name, _ in outputs},
@@ -36,10 +39,16 @@ class IO:
         }
         self._types = {name: type_obj for name, type_obj in outputs}
         self._assigned = {name for name, _ in outputs}  # Set of unassigned outputs
-        self._all_names = tuple(self._ports.keys())  # Cache for error messages
+        self._all_names = tuple(self._ports.keys()) + tuple(self._interfaces.keys())  # Cache for error messages
     
     def __getattr__(self, name):
-        """Get port value."""
+        """Get port value or interface handle."""
+        if name in self._interfaces:
+            if name not in self._interface_handles:
+                spec = self._interfaces[name]
+                self._interface_handles[name] = spec.interface_cls.create_handle(name, spec, self)
+            return self._interface_handles[name]
+
         port = self._ports.get(name)
         if port is None:
             raise AttributeError(self._error_no_port(name))

@@ -47,6 +47,13 @@ from .primitives import Reg, Wire, Mux, Map, Mem, Fifo
 
 from .parameters import ParameterProxy, ParameterResolver, clog2, Param
 
+from .interfaces import (
+    Interface, Bundle,
+    InterfacePort, InterfaceHandle, InterfaceRole,
+    Stream, StreamHandle,
+    StreamChannel,
+)
+
 from .simulation import Simulator
 
 
@@ -69,6 +76,12 @@ __all__ = [
     # Module
     'Module', 'INPUT', 'OUTPUT', 'INOUT',
     
+    # Interfaces & Streams
+    'Interface', 'Bundle',
+    'InterfacePort', 'InterfaceHandle', 'InterfaceRole',
+    'Stream', 'StreamHandle',
+    'StreamChannel',
+
     # Primitives
     'Reg', 'Wire', 'Mux', 'Map', 'Mem', 'Fifo',
     

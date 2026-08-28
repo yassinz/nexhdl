@@ -22,9 +22,18 @@ class PortDirection:
         return self.__class__[new_type] if new_type is not self.type_obj else self
     
     def __class_getitem__(cls, type_obj):
-        """Allow [Type] syntax."""
+        """Allow [Type] syntax for types and interfaces."""
         if is_parameter(type_obj):
             return cls(type_obj)
+
+        from ..interfaces.base import Interface, InterfacePort, InterfaceRole
+        if isinstance(type_obj, type) and issubclass(type_obj, Interface):
+            role = InterfaceRole.OUTPUT if cls._direction == hw.ModulePortDirection.OUTPUT else InterfaceRole.INPUT
+            return InterfacePort(type_obj, role=role)
+
+        if isinstance(type_obj, InterfacePort):
+            role = InterfaceRole.OUTPUT if cls._direction == hw.ModulePortDirection.OUTPUT else InterfaceRole.INPUT
+            return InterfacePort(type_obj.interface_cls, role=role)
 
         return cls(to_nex_type(type_obj))
     

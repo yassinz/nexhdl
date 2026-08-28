@@ -23,12 +23,37 @@ class ModuleMeta(type):
         hw_name = name.replace('[', '_').replace(']', '').replace(',', 'x').replace(' ', '')
         hw_name = hw_name.replace('<', '').replace('>', '')
         
+        interfaces = {}
+        
         # If it's a parameterized module (already has _port_type_objs), just set the name and return
         if '_port_type_objs' in namespace:
             namespace['name'] = hw_name
             return super().__new__(cls, name, bases, namespace)
         
+        from ..interfaces.base import InterfacePort, Interface, InterfaceRole
+        
         for port_name, annotation in namespace.get('__annotations__', {}).items():
+            # Check if annotation is an Interface or InterfacePort
+            if isinstance(annotation, type) and issubclass(annotation, Interface):
+                annotation = InterfacePort(annotation, role=InterfaceRole.OUTPUT)
+            
+            if isinstance(annotation, InterfacePort):
+                interfaces[port_name] = annotation
+                flattened = annotation.get_flattened_ports(port_name)
+                for full_name, direction, type_obj in flattened:
+                    if type_obj is None:
+                        raise ValueError(f"Interface port '{full_name}' has no type specified.")
+                    port_types[full_name] = type_obj
+                    direction_map = {
+                        hw.ModulePortDirection.INPUT: 'input',
+                        hw.ModulePortDirection.OUTPUT: 'output',
+                        hw.ModulePortDirection.INOUT: 'inout'
+                    }
+                    key = direction_map.get(direction)
+                    if key:
+                        ports[key].append((full_name, direction))
+                continue
+
             if not isinstance(annotation, PortDirection):
                 continue
             
@@ -56,6 +81,7 @@ class ModuleMeta(type):
         namespace['inouts'] = ports['inout']
         namespace['ports'] = ports['input'] + ports['output'] + ports['inout']
         namespace['_port_type_objs'] = port_types
+        namespace['_interfaces'] = interfaces
         
         return super().__new__(cls, name, bases, namespace)
     
@@ -121,6 +147,13 @@ class ModuleMeta(type):
                     pass
                 resolved_ports[name] = resolved
             new_namespace['_port_type_objs'] = resolved_ports
+
+        # Resolve interfaces
+        if hasattr(cls, '_interfaces'):
+            resolved_interfaces = {}
+            for name, iface in cls._interfaces.items():
+                resolved_interfaces[name] = ParameterResolver.resolve(iface, extended_params)
+            new_namespace['_interfaces'] = resolved_interfaces
         
         # Resolve annotations
         if hasattr(cls, '__annotations__'):
@@ -142,6 +175,20 @@ class ModuleMeta(type):
                 f"Use {cls.__name__}[{', '.join(param_names)}](...) syntax."
             )
         
+        # Expand interface handles in kwargs if any
+        if kwargs and hasattr(cls, '_interfaces'):
+            from ..interfaces.base import InterfaceHandle
+            expanded_kwargs = {}
+            for k, v in kwargs.items():
+                if k in cls._interfaces and isinstance(v, InterfaceHandle):
+                    iface_spec = cls._interfaces[k]
+                    for port_name in getattr(iface_spec.interface_cls, '_port_defs', {}):
+                        full_name = f"{k}_{port_name}"
+                        expanded_kwargs[full_name] = getattr(v, port_name)
+                else:
+                    expanded_kwargs[k] = v
+            kwargs = expanded_kwargs
+
         # Validate port values if provided
         if kwargs and hasattr(cls, '_port_type_objs'):
             for port_name in kwargs:

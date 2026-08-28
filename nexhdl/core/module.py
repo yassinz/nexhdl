@@ -109,7 +109,8 @@ class Module(metaclass=ModuleMeta):
         
         io_outputs = [(name, to_nex_type(self._port_type_objs[name])) 
                       for name, _ in self.outputs]
-        io = IO(self.name, io_inputs, io_outputs, self.inouts)
+        interfaces = getattr(self, '_interfaces', {})
+        io = IO(self.name, io_inputs, io_outputs, self.inouts, interfaces=interfaces)
         
         # Build with proper insertion point and tracing
         # Pass context to nested module instantiations
@@ -154,13 +155,14 @@ class Module(metaclass=ModuleMeta):
         """Generate Verilog from the compiled module."""
         if passes is None:
             passes = [
-            "builtin.module(hw.module(lower-seq-fifo))",
-            "builtin.module(hw.module(lower-seq-hlmem))",
-            "builtin.module(lower-seq-to-sv)",
-            #"builtin.module(hw-flatten-modules)",
-            "builtin.module(hw.module(hw-cleanup{merge-always-blocks}))",
-            "builtin.module(cse, canonicalize)",
-        ]
+                "builtin.module(lower-esi-to-physical, lower-esi-ports, lower-esi-to-hw)",
+                "builtin.module(hw.module(lower-seq-fifo))",
+                "builtin.module(hw.module(lower-seq-hlmem))",
+                "builtin.module(lower-seq-to-sv)",
+                #"builtin.module(hw-flatten-modules)",
+                "builtin.module(hw.module(hw-cleanup{merge-always-blocks}))",
+                "builtin.module(cse, canonicalize)",
+            ]
 
         m = circt.ir.Module.parse(str(self.module))
         for ps in passes:

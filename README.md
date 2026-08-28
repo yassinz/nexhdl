@@ -118,6 +118,24 @@ print(addr.verilog())
 - **Fifo[N, T]** - FIFO with `.push` and `.pop` methods
 
 
+### Interfaces & Streams (ESI-Style)
+
+- **Stream[T]** - Ready/valid streaming channels with automatic direction handling
+- **Interface / Bundle** - Custom protocol and bus groupings with `INPUT[...]` and `OUTPUT[...]` polarity flipping
+- **StreamChannel[T]** - Internal point-to-point streaming channel wiring
+
+```python
+class StreamProcessor[WIDTH: int](Module):
+    clk: INPUT[Clock]
+    rst: INPUT[Reset]
+    inp: INPUT[Stream[Logic[WIDTH]]]
+    out: OUTPUT[Stream[Logic[WIDTH]]]
+
+    def build(self, io):
+        io.inp.ready = io.out.ready
+        io.out.push(io.inp.data * 2, enable=io.inp.valid)
+```
+
 ### Registers
 
 ```python
@@ -155,6 +173,7 @@ result = Mux[Logic[32]](sel, true_val, false_val)
 
 See the `examples/` directory for a variety of hardware designs:
 - **[RV32I](examples/RV32I/)**: A complete RISC-V RV32I CPU implementation.
+- **[Streaming Pipeline](examples/stream_pipeline.py)**: Elastic packet processing with `Stream[Packet]` and backpressure.
 - **[DSP Components](examples/dsp.py)**: DotProduct, Pipelined MAC, and FIR filters.
 - **[Networking](examples/crc32.py)**: CRC-32 generator and packet protocol inspectors.
 - **[Systolic Array](examples/systolic_array.py)**: Parallel matrix multiplication engine.
@@ -164,9 +183,10 @@ See the `examples/` directory for a variety of hardware designs:
 
 - [Types](docs/types.md) - Logic, Array, Struct, Union
 - [Primitives](docs/primitives.md) - Reg, Wire, Mux, Mem, Fifo
+- [Interfaces & Streams](docs/interfaces.md) - Interface, Bundle, Stream (ESI)
 - [Modules](docs/modules.md) - Module definition and hierarchy
 - [Parameterization](docs/parameterization.md) - Generic types and modules
-- [Simulation](docs/simulation.md): Fast JIT-based simulation and VCD tracing.
+- [Simulation](docs/simulation.md) - Fast JIT-based simulation and VCD tracing
 
 ## Project Structure
 
@@ -175,9 +195,10 @@ nexhdl/
 ├── nexhdl/
 │   ├── core/           # Module system
 │   ├── types/          # Type system (Logic, Array, Struct, Union)
-│   ├── primitives/     # Reg, Wire, Mux
+│   ├── primitives/     # Reg, Wire, Mux, Mem, Fifo, Map
+│   ├── interfaces/     # Interface, Bundle, Stream (ESI)
 │   ├── simulation/     # LLVM-based simulator
-│   └── utils/          # Type utilities and parameters
+│   └── parameters/     # PEP 695 generics & parameter resolvers
 ├── examples/           # Example designs
 ├── test/               # Tests
 ├── docs/               # Documentation
@@ -219,9 +240,9 @@ Current focus:
 - Core type system ✅
 - Module system ✅
 - Primitives (Reg, Wire, Mux, Map, Mem, Fifo) ✅
+- Interfaces and Streams (ESI) ✅
 - Simulation ✅
 - Documentation 🚧
-- interfaces/protocols 🚧
 - Fsm and Pipeline 🚧
 - Standard library 🚧
 

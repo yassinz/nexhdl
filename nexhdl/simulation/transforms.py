@@ -80,6 +80,9 @@ def translate_to_llvm(hw_module: circt.ir.Module):
 
     m = circt.ir.Module.parse(str(hw_module))
 
+    # ESI lowering pipeline (lowers !esi.channel, esi.wrap/unwrap, esi.stage to HW)
+    run_pass(m, "builtin.module(lower-esi-to-physical, lower-esi-ports, lower-esi-to-hw)")
+
     # Arc preprocessing
     run_pass(m, "builtin.module(hw.module(lower-seq-fifo))")
     remove_verif_clocked_assert(m)
