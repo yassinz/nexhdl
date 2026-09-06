@@ -216,17 +216,6 @@ def test_stream_channel_internal():
         assert sim.io.result == 101
 
 
-
-def test_circt_esi_channel_integration():
-    """Test direct CIRCT ESI dialect type and channel integration."""
-    from circt.dialects import esi
-    ctx = get_context()
-    with ctx:
-        esi_type = Stream[Logic[32]].to_esi_channel_type()
-        assert isinstance(esi_type, esi.ChannelType)
-        assert "!esi.channel<i32>" in str(esi_type)
-
-
 if __name__ == "__main__":
     test_interface_definition()
     test_stream_module_ports()
@@ -234,5 +223,4 @@ if __name__ == "__main__":
     test_parameterized_stream_struct()
     test_stream_connect_syntax()
     test_stream_channel_internal()
-    test_circt_esi_channel_integration()
     

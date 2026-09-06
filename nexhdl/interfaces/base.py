@@ -3,7 +3,7 @@ Interface and Bundle Base Classes
 
 Provides grouping of related hardware ports with direction flipping:
 - Master / Slave
-- Producer / Consumer (ESI-style Source / Sink)
+- Producer / Consumer (Source / Sink)
 - Flipped
 """
 

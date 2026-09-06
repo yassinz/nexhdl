@@ -1,5 +1,5 @@
 """
-Stream Interface (Ready/Valid Protocol based on ESI)
+Stream Interface (Ready/Valid Protocol)
 
 A standard handshaked streaming channel with data, valid, and ready signals.
 """
@@ -7,7 +7,7 @@ A standard handshaked streaming channel with data, valid, and ready signals.
 from typing import Any
 from ..core.ports import INPUT, OUTPUT
 from ..types.logic import Logic
-from ..types.base import NexValue, to_nex_type, NexType
+from ..types.base import NexValue
 from .base import Interface, InterfacePort, InterfaceHandle, InterfaceRole
 
 
@@ -103,40 +103,6 @@ class StreamHandle(InterfaceHandle):
                 f"Connect an OUTPUT to an INPUT."
             )
 
-    @classmethod
-    def to_esi_channel_type(cls):
-        """Get CIRCT !esi.channel<T> type for this stream."""
-        from circt.dialects import esi
-        port_defs = getattr(cls, '_port_defs', {})
-        data_port = port_defs.get('data')
-        if data_port is not None:
-            circt_inner_type = NexType.to_circt(data_port.type_obj)
-            return esi.ChannelType.get(circt_inner_type)
-        return None
-
-    def wrap_esi(self, data: Any, valid: Any):
-        """Wrap raw data and valid signals into an ESI Channel using circt.dialects.esi.wrap_vr."""
-        from circt.dialects import esi
-        import circt
-        chan_type = self._spec.interface_cls.to_esi_channel_type()
-        i1 = circt.ir.IntegerType.get_signless(1)
-        raw_val = data.value if hasattr(data, 'value') else data
-        val_valid = valid.value if hasattr(valid, 'value') else valid
-        chan, ready = esi.wrap_vr(chan_type, i1, raw_val, val_valid)
-        return chan, ready
-
-    def unwrap_esi(self, chan_input: Any, ready: Any):
-        """Unwrap an ESI Channel into raw data and valid signals using circt.dialects.esi.unwrap_vr."""
-        from circt.dialects import esi
-        import circt
-        port_defs = getattr(self._spec.interface_cls, '_port_defs', {})
-        data_port = port_defs.get('data')
-        inner_type = NexType.to_circt(data_port.type_obj)
-        i1 = circt.ir.IntegerType.get_signless(1)
-        raw_ready = ready.value if hasattr(ready, 'value') else ready
-        data, valid = esi.unwrap_vr(inner_type, i1, chan_input, raw_ready)
-        return data, valid
-
     def __repr__(self):
         dir_str = "OUTPUT" if self.is_output else "INPUT"
         return f"<StreamHandle '{self._name}' direction={dir_str}>"
@@ -144,7 +110,7 @@ class StreamHandle(InterfaceHandle):
 
 class Stream[T](Interface):
     """
-    Ready/Valid streaming interface based on CIRCT's ESI dialect.
+    Ready/Valid streaming interface.
 
     Default directions (Producer / Source):
     - valid: OUTPUT (Sender indicates data is valid)
@@ -162,13 +128,3 @@ class Stream[T](Interface):
     ready: INPUT[Logic[1]]
     data:  OUTPUT[T]
 
-    @classmethod
-    def to_esi_channel_type(cls):
-        """Get CIRCT !esi.channel<T> type."""
-        from circt.dialects import esi
-        port_defs = getattr(cls, '_port_defs', {})
-        data_port = port_defs.get('data')
-        if data_port is not None:
-            circt_inner_type = NexType.to_circt(data_port.type_obj)
-            return esi.ChannelType.get(circt_inner_type)
-        return None

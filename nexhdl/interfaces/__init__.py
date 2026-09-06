@@ -1,5 +1,5 @@
 """
-Hardware Interfaces and Streaming Protocols (ESI / Stream)
+Hardware Interfaces and Streaming Protocols
 """
 
 from .base import (
