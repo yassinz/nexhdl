@@ -188,6 +188,7 @@ if __name__ == "__main__":
     N, W = 16, 16
     L = clog2(N)
     dut = StreamingFFT[N, W]()
+    print(dut.verilog())
 
     with dut.simulate() as sim:
         sim.io.rst = 0; sim.io.in_valid = 0; sim.tick(); sim.io.rst = 1
