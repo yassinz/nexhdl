@@ -37,12 +37,12 @@ class TraceVars:
                 value.set_name(name)
     
     def __enter__(self):
-        self.old_trace = sys.gettrace()
-        sys.settrace(self._trace)
+        self.old_trace = sys.getprofile()
+        sys.setprofile(self._trace)
         return self
     
     def __exit__(self, exc_type, exc_value, traceback):
-        sys.settrace(self.old_trace)
+        sys.setprofile(self.old_trace)
         self._update_names()
         self.target_frame = None
         self.local_vars = {}
