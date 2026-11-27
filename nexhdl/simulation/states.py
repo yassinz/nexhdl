@@ -103,17 +103,22 @@ def get_states_info(module):
     ports = []
     states = []
     memories = []
-    lastop = None
+    size = 0
 
     collected_ops = []
     def callback(op):
         collected_ops.append(op)
         return WalkResult.ADVANCE
 
-    ops = ["arc.root_input", "arc.alloc_state", "arc.alloc_memory", "arc.root_output"]
+    ops = ["arc.model", "arc.root_input", "arc.alloc_state", "arc.alloc_memory", "arc.root_output"]
     walk_with_filter(module.operation, ops, callback, WalkOrder.POST_ORDER)
         
     for op in collected_ops:
+        if op.name == "arc.model":
+            if "storageBytes" in op.attributes:
+                size = op.attributes['storageBytes'].value
+            continue
+
         offset_bytes = op.attributes['offset'].value
         
         if op.name == "arc.alloc_memory":
@@ -148,9 +153,6 @@ def get_states_info(module):
             direction = "input" if op.name == "arc.root_input" else "output"
             ports.append(PortData(name, offset_bytes, get_bitwidth(t), t, direction))
 
-        lastop = op.operands[0].type
-
-    size = int(str(lastop)[13:-1])
     return StatesInfo(ports, states, memories, size)
 
 

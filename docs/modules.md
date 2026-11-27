@@ -30,15 +30,12 @@ class MyModule(Module):
     data_out: OUTPUT[Logic[32]]
     valid: OUTPUT[Logic[1]]
     
-    # Bidirectional (rare)
-    bus: INOUT[Logic[16]]
 ```
 
 ### Port Types
 
 - `INPUT[T]` - Read-only input port
 - `OUTPUT[T]` - Write-once output port  
-- `INOUT[T]` - Bidirectional port
 
 Any NexType can be used:
 ```python

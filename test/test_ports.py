@@ -1,6 +1,6 @@
 
 import pytest
-from nexhdl.core.ports import INPUT, OUTPUT, INOUT
+from nexhdl.core.ports import INPUT, OUTPUT
 from nexhdl.types import Logic, Clock, Reset, Array, Struct
 from nexhdl.types import to_nex_type
 from nexhdl.parameters import ParameterProxy

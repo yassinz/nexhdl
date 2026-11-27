@@ -41,7 +41,7 @@ from .types import (
     to_nex_type, get_value_class, wrap,
 )
 
-from .core import Module, INPUT, OUTPUT, INOUT
+from .core import Module, INPUT, OUTPUT
 
 from .primitives import Reg, Wire, Mux, Map, Mem, Fifo
 
@@ -74,7 +74,7 @@ __all__ = [
     'Reset', 'ResetType',
     
     # Module
-    'Module', 'INPUT', 'OUTPUT', 'INOUT',
+    'Module', 'INPUT', 'OUTPUT',
     
     # Interfaces & Streams
     'Interface', 'Bundle',

@@ -13,12 +13,11 @@ class IO:
     Enforces port access rules:
     - Inputs: read-only
     - Outputs: write-once, read after assignment
-    - Inouts: read-write
     """
     
     __slots__ = ('_module_name', '_ports', '_types', '_assigned', '_all_names', '_interfaces', '_interface_handles')
     
-    def __init__(self, module_name, inputs, outputs, inouts, interfaces=None):
+    def __init__(self, module_name, inputs, outputs, interfaces=None):
         """
         Initialize IO interface.
         
@@ -26,7 +25,6 @@ class IO:
             module_name: Name of the module (for error messages)
             inputs: List of (name, value) tuples
             outputs: List of (name, type_obj) tuples
-            inouts: List of (name, value) tuples
             interfaces: Optional dict of {interface_name: InterfacePort}
         """
         self._module_name = module_name
@@ -34,8 +32,7 @@ class IO:
         self._interface_handles = {}
         self._ports = {
             **{name: ('input', val) for name, val in inputs},
-            **{name: ('output', None) for name, _ in outputs},
-            **{name: ('inout', val) for name, val in inouts}
+            **{name: ('output', None) for name, _ in outputs}
         }
         self._types = {name: type_obj for name, type_obj in outputs}
         self._assigned = {name for name, _ in outputs}  # Set of unassigned outputs
@@ -93,8 +90,8 @@ class IO:
                 )
             self._assigned.discard(name)
         
-        # Type check for output and inout
-        if port_type in ('output', 'inout'):
+        # Type check for output
+        if port_type == 'output':
             target_type = self._types.get(name)
             if target_type:
                 if not isinstance(value, NexValue):
@@ -144,13 +141,8 @@ class IO:
         """Get dictionary of assigned output ports."""
         return {n: v for n, (t, v) in self._ports.items() if t == 'output' and n not in self._assigned}
     
-    @property
-    def inouts(self):
-        """Get dictionary of inout ports."""
-        return {n: v for n, (t, v) in self._ports.items() if t == 'inout'}
-    
     def __repr__(self):
-        by_type = {'input': [], 'output': [], 'inout': []}
+        by_type = {'input': [], 'output': []}
         for name, (port_type, _) in self._ports.items():
             by_type[port_type].append(name)
         

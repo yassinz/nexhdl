@@ -10,7 +10,7 @@ Provides grouping of related hardware ports with direction flipping:
 from typing import Dict, Any, Tuple, List
 from circt.dialects import hw
 
-from ..core.ports import PortDirection, INPUT, OUTPUT, INOUT
+from ..core.ports import PortDirection, INPUT, OUTPUT
 from ..parameters import ParameterizedMeta, ParameterResolver, is_parameter
 from ..types.base import to_nex_type, NexType
 

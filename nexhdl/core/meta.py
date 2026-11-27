@@ -10,6 +10,12 @@ from ..parameters import ParameterizedNamespace, ParameterResolver, Param, speci
 from ..types.base import to_nex_type
 
 
+_DIRECTION_MAP = {
+    hw.ModulePortDirection.INPUT: 'input',
+    hw.ModulePortDirection.OUTPUT: 'output',
+}
+
+
 class ModuleMeta(type):
     """Metaclass that processes module port annotations and parameters."""
     
@@ -18,7 +24,7 @@ class ModuleMeta(type):
         return ParameterizedNamespace()
     
     def __new__(cls, name, bases, namespace):
-        ports = {'input': [], 'output': [], 'inout': []}
+        ports = {'input': [], 'output': []}
         port_types = {}
         hw_name = name.replace('[', '_').replace(']', '').replace(',', 'x').replace(' ', '')
         hw_name = hw_name.replace('<', '').replace('>', '')
@@ -44,12 +50,7 @@ class ModuleMeta(type):
                     if type_obj is None:
                         raise ValueError(f"Interface port '{full_name}' has no type specified.")
                     port_types[full_name] = type_obj
-                    direction_map = {
-                        hw.ModulePortDirection.INPUT: 'input',
-                        hw.ModulePortDirection.OUTPUT: 'output',
-                        hw.ModulePortDirection.INOUT: 'inout'
-                    }
-                    key = direction_map.get(direction)
+                    key = _DIRECTION_MAP.get(direction)
                     if key:
                         ports[key].append((full_name, direction))
                 continue
@@ -66,20 +67,14 @@ class ModuleMeta(type):
             port_types[port_name] = annotation.type_obj
             
             # Map direction to port list
-            direction_map = {
-                hw.ModulePortDirection.INPUT: 'input',
-                hw.ModulePortDirection.OUTPUT: 'output',
-                hw.ModulePortDirection.INOUT: 'inout'
-            }
-            key = direction_map.get(annotation.direction)
+            key = _DIRECTION_MAP.get(annotation.direction)
             if key:
                 ports[key].append((port_name, annotation.direction))
         
         namespace['name'] = hw_name
         namespace['inputs'] = ports['input']
         namespace['outputs'] = ports['output']
-        namespace['inouts'] = ports['inout']
-        namespace['ports'] = ports['input'] + ports['output'] + ports['inout']
+        namespace['ports'] = ports['input'] + ports['output']
         namespace['_port_type_objs'] = port_types
         namespace['_interfaces'] = interfaces
         
@@ -119,7 +114,7 @@ class ModuleMeta(type):
         new_namespace = extended_params.copy()
         
         # Copy structural metadata
-        for key in ('inputs', 'outputs', 'inouts', 'ports'):
+        for key in ('inputs', 'outputs', 'ports'):
             if hasattr(cls, key):
                 new_namespace[key] = getattr(cls, key)
         

@@ -10,7 +10,7 @@ All hardware components are classes inheriting from `Module`.
 
 ### **Structural Rules**
 1.  **Port Definitions**: Defined as class-level type annotations.
-    - `INPUT[Type]`, `OUTPUT[Type]`, `INOUT[Type]`.
+    - `INPUT[Type]`, `OUTPUT[Type]`.
 2.  **The `build` Method**: The logic **MUST** reside inside `def build(self, io):`.
     - **No logic** should be in `__init__` except for simple scalar parameter checks.
 3.  **IO Object**: Access all ports via the `io` argument.

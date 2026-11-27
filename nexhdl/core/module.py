@@ -110,7 +110,7 @@ class Module(metaclass=ModuleMeta):
         io_outputs = [(name, to_nex_type(self._port_type_objs[name])) 
                       for name, _ in self.outputs]
         interfaces = getattr(self, '_interfaces', {})
-        io = IO(self.name, io_inputs, io_outputs, self.inouts, interfaces=interfaces)
+        io = IO(self.name, io_inputs, io_outputs, interfaces=interfaces)
         
         # Build with proper insertion point and tracing
         # Pass context to nested module instantiations

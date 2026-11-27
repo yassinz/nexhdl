@@ -41,7 +41,6 @@ class PortDirection:
         direction_name = {
             hw.ModulePortDirection.INPUT: "INPUT",
             hw.ModulePortDirection.OUTPUT: "OUTPUT",
-            hw.ModulePortDirection.INOUT: "INOUT"
         }.get(self.direction, "UNKNOWN")
         
         if self.type_obj:
@@ -64,10 +63,3 @@ class OUTPUT(PortDirection):
     def __init__(self, type_obj=None):
         super().__init__(self._direction, type_obj)
 
-
-class INOUT(PortDirection):
-    """Bidirectional port. Use INOUT[Type]."""
-    _direction = hw.ModulePortDirection.INOUT
-    
-    def __init__(self, type_obj=None):
-        super().__init__(self._direction, type_obj)
