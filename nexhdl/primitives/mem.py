@@ -79,7 +79,7 @@ class MemInstance:
         
         clock = Clock.get_active()
         reset = Reset.get_active()
-        reset_val = reset.value if reset else Logic[1](0).value
+        reset_val = reset.value if reset is not None else Logic[1](0).value
         
         hlmem_type = circt.ir.Type.parse(
             f"!seq.hlmem<{self._mem_type.size}xi{self._data_width}>"

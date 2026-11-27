@@ -80,7 +80,7 @@ AI developers must distinguish between **Elaboration-time** Python and **Runtime
 
 ### **Python `if` is NOT Hardware**
 - **WRONG**: `if io.cond: io.out = a` 
-  - This checks `io.cond` (an NexHDL object) during Python execution. It evaluates to `True` if the object exists, NOT the bit value.
+  - Python `if`/`and`/`or`/`not` operate on Python truthiness rather than hardware signals and raise `TypeError("Use Mux/&/| for hardware conditions")` on `NexValue` signals.
 - **RIGHT**: `io.out = Mux[Logic[N]](io.cond, a, b)`
   - This generates a hardware multiplexer gates.
 

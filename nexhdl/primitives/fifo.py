@@ -78,7 +78,7 @@ class FifoInstance:
         
         clock = Clock.get_active()
         reset = Reset.get_active()
-        reset_val = reset.value if reset else Logic[1](0).value
+        reset_val = reset.value if reset is not None else Logic[1](0).value
         
         # Create placeholders
         self._data_placeholder = self._fifo_type.data_type.zero().value

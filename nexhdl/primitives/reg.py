@@ -90,15 +90,15 @@ def _create_reg_class(ValueClass, data_type):
         reset = Reset.get_active()
         
         # Build compreg
-        if reset:
-            reset_val = (self._reg_reset_value.value if self._reg_reset_value 
+        if reset is not None:
+            reset_val = (self._reg_reset_value.value if self._reg_reset_value is not None
                         else self._reg_data_type.zero().value)
             new_output = seq.compreg(next_ir, clock.value, reset=reset.value, reset_value=reset_val)
         else:
             new_output = seq.compreg(next_ir, clock.value)
         
         # Set initial value attribute if provided
-        if self._reg_init:
+        if self._reg_init is not None:
             init_attr = self._extract_init_attr()
             if init_attr:
                 new_output.owner.attributes['initialValue'] = init_attr

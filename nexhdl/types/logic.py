@@ -398,16 +398,14 @@ class Logic(NexValue):
         """Reverse the order of bits."""
         return Logic(comb.reverse(self._value))
     
-    # ==================== Iteration ====================
-    
-    def __iter__(self):
-        """Iterate over each bit."""
-        for i in range(self.width):
-            yield self[i]
-    
+    # ==================== Iteration & Length ====================
+
+    # Disable implicit sequence iteration inherited from __getitem__
+    __iter__ = None
+
     def __len__(self):
-        """Return bit width."""
-        return self.width
+        """Disallow len() on Logic; bit width is exposed via .width."""
+        raise TypeError("Use .width for bit width of Logic")
     
     # ==================== Class Method ====================
     

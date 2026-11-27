@@ -253,6 +253,10 @@ class NexValue(ABC):
             self.value.owner.attributes['sv.namehint'] = namehint
         self._nex_name = name
 
+    def __bool__(self):
+        """Disallow Python truthiness on hardware values."""
+        raise TypeError("Use Mux/&/| for hardware conditions")
+
     def __hash__(self):
         return self.value.__hash__()
     
