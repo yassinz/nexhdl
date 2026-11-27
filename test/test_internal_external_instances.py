@@ -11,20 +11,6 @@ class InternalAdder[WIDTH: int](Module):
         io.out = io.a + io.b
 
 
-class InternalCounter[WIDTH: int](Module):
-    clk: INPUT[Logic[1]]
-    rst: INPUT[Logic[1]]
-    en: INPUT[Logic[1]]
-    count: OUTPUT[Logic[WIDTH]]
-
-    def build(self, io):
-        reg = Reg[Logic[WIDTH]](io.clk, io.rst)
-        with io.clk.posedge:
-            with io.rst:
-                reg.next = Logic[WIDTH](0)
-            with io.en:
-                reg.next = reg.value + Logic[WIDTH](1)
-        io.count = reg.value
 
 
 # External modules (without build method - black boxes)
